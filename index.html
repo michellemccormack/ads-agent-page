@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Ads agent</title></head><body style="margin:0;background:#fff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Libre+Caslon+Text:wght@400;700&display=swap" rel="stylesheet">
+<div id="aa">
+<style>
+#aa{--ink:#111;--muted:#666;--line:#e3e3e3;--bg:#fff;--card:#fafafa;--red:#c8102e;--good:#0f7b3d;--warn:#b45309;
+  font-family:Archivo,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);max-width:1040px;margin:0 auto;padding:16px;line-height:1.4}
+#aa *{box-sizing:border-box}
+#aa h1{font-family:"Libre Caslon Text",Georgia,serif;font-size:34px;margin:0 0 4px;font-weight:700}
+#aa h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:28px 0 10px;color:var(--muted);font-weight:800}
+#aa .sub{color:var(--muted);font-size:14px}
+#aa .bar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+#aa a.btn,#aa button.btn{display:inline-block;font:600 14px Archivo,sans-serif;padding:10px 14px;border:1.5px solid var(--ink);
+  background:#fff;color:var(--ink);text-decoration:none;cursor:pointer;border-radius:0}
+#aa a.btn.primary,#aa button.btn.primary{background:var(--ink);color:#fff}
+#aa a.btn:hover,#aa button.btn:hover{background:var(--red);border-color:var(--red);color:#fff}
+#aa .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+#aa .tile{border:1px solid var(--line);background:var(--card);padding:14px}
+#aa .tile .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+#aa .tile .v{font-size:26px;font-weight:800;margin-top:4px}
+#aa .tile .n{font-size:12px;color:var(--muted);margin-top:2px}
+#aa .meter{height:8px;background:var(--line);margin-top:8px}
+#aa .meter i{display:block;height:100%;background:var(--ink)}
+#aa .alert{border-left:4px solid var(--red);background:#fff4f5;padding:12px 14px;margin-bottom:8px}
+#aa .ok{border-left:4px solid var(--good);background:#f2faf5;padding:12px 14px}
+#aa .stale{border-left:4px solid var(--warn);background:#fff8ef;padding:12px 14px;margin-top:12px}
+#aa .wrap{overflow-x:auto;border:1px solid var(--line)}
+#aa table{border-collapse:collapse;width:100%;font-size:14px;min-width:720px}
+#aa th,#aa td{padding:10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+#aa th:first-child,#aa td:first-child{text-align:left}
+#aa th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:var(--card)}
+#aa .verdict{font-weight:600}
+#aa .prop{border:1px solid var(--line);padding:14px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+#aa .note{font-size:13px;color:var(--muted);margin-top:8px}
+#aa .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+@media (max-width:600px){#aa h1{font-size:28px}#aa .tile .v{font-size:22px}}
+</style>
+
+<h1>Ads agent</h1>
+<div class="sub" id="aa-updated">Loading…</div>
+<div class="bar">
+  <a class="btn primary" id="aa-check" target="_blank" rel="noopener">Check now</a>
+  <a class="btn" id="aa-alerts" target="_blank" rel="noopener">Alerts</a>
+  <a class="btn" id="aa-reports" target="_blank" rel="noopener">Daily reports</a>
+  <a class="btn" href="https://adsmanager.facebook.com/adsmanager/manage/ads?act=770129537881668&business_id=406129259858531" target="_blank" rel="noopener">Meta Ads Manager</a>
+  <a class="btn" href="https://admin.shopify.com/store/boston-sweet-shirts/orders" target="_blank" rel="noopener">Shopify orders</a>
+  <button class="btn" id="aa-refresh" type="button">Refresh</button>
+</div>
+<div id="aa-body"></div>
+</div>
+
+<script>
+(function(){
+  // The data key lives only in the bookmark (after #), never in this file, and is never sent to the page host.
+  var GIST_ID = (location.hash.match(/[0-9a-f]{32}/) || [""])[0];
+  var FILE = "ads-agent-status.json";
+  var REPO = "michellemccormack/secret-boston-ads-agent";
+  var $ = function(id){return document.getElementById(id)};
+  $("aa-check").href = "https://github.com/"+REPO+"/actions/workflows/hourly.yml";
+  $("aa-alerts").href = "https://github.com/"+REPO+"/issues?q=is%3Aissue+label%3Aalert";
+  $("aa-reports").href = "https://github.com/"+REPO+"/tree/main/reports";
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function money(x){if(x==null)return "–";var a=Math.abs(x).toLocaleString("en-US",{style:"currency",currency:"USD"});return x<0?"-"+a:a}
+  function ago(iso){var m=Math.round((Date.now()-new Date(iso))/60000);if(m<1)return "just now";if(m<60)return m+" min ago";var h=Math.floor(m/60);return h+" hr "+(m%60)+" min ago"}
+  function nice(n){return String(n).replace(/^TEST_[A-Z]_/,"").replace(/_/g," ")}
+  function decide(word,p){
+    var u="https://github.com/"+REPO+"/issues/new?labels=decision&title="+encodeURIComponent(word+" #"+p.number)+
+      "&body="+encodeURIComponent((word==="approve"?"Approved":"Rejected")+": "+p.title+"\n\nClick Create. The Ads agent records this within the hour.");
+    return '<a class="btn'+(word==="approve"?" primary":"")+'" target="_blank" rel="noopener" href="'+u+'">'+(word==="approve"?"Approve":"Reject")+'</a>';
+  }
+
+  function render(s){
+    var h="", c=s.campaign||{}, shop=s.shop||{};
+    var mins=(Date.now()-new Date(s.updated_at))/60000;
+    $("aa-updated").textContent="Last check "+ago(s.updated_at)+" · "+new Date(s.updated_at).toLocaleString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" ET";
+
+    h+="<h2>Right now</h2>";
+    if(s.problems&&s.problems.length){s.problems.forEach(function(p){h+='<div class="alert"><b>'+esc(p.title)+'</b><br>'+esc(p.detail)+'</div>'})}
+    else h+='<div class="ok"><b>No problems.</b> Ads, shop, tracking and spend all look normal.</div>';
+    if(mins>150) h+='<div class="stale"><b>This page is out of date.</b> The agent hasn\'t checked in over 2 hours. Click Check now.</div>';
+    var src=s.sources||{};
+    h+='<div class="note">'+["meta","shopify","site"].map(function(k){var ok=src[k]==="ok";return '<span class="dot" style="background:'+(ok?"var(--good)":"var(--red)")+'"></span>'+({meta:"Meta",shopify:"Shopify",site:"Shop site"})[k]+(ok?"":" ("+esc(src[k])+")")}).join(" &nbsp; ")+'</div>';
+
+    h+="<h2>Decisions waiting for you</h2>";
+    if(s.proposals&&s.proposals.length){s.proposals.forEach(function(p){
+      h+='<div class="prop"><div><b>'+esc(p.title)+'</b><br><a href="'+esc(p.url)+'" target="_blank" rel="noopener" class="sub">Read the full proposal</a></div><div>'+decide("approve",p)+" "+decide("reject",p)+'</div></div>'})}
+    else h+='<div class="sub">Nothing to approve.</div>';
+
+    var pct=c.budget?Math.min(100,100*c.spend_total/c.budget):0;
+    h+="<h2>Christmas test · Meta · "+esc(c.start)+" to "+esc(c.end)+"</h2>";
+    h+='<div class="tiles">'+
+      '<div class="tile"><div class="k">Spent</div><div class="v">'+money(c.spend_total)+'</div><div class="n">of '+money(c.budget)+' approved · '+money(c.spend_today)+' today</div><div class="meter"><i style="width:'+pct.toFixed(1)+'%"></i></div></div>'+
+      '<div class="tile"><div class="k">Shop orders</div><div class="v">'+(shop.orders_since_start||0)+'</div><div class="n">since launch · '+(shop.ad_tagged_orders||0)+' tagged to these ads</div></div>'+
+      '<div class="tile"><div class="k">Shop sales</div><div class="v">'+money(shop.revenue_since_start)+'</div><div class="n">since launch, after refunds</div></div>'+
+      '<div class="tile"><div class="k">Profit after ads</div><div class="v">'+money(shop.profit_after_ads_floor)+'</div><div class="n">tagged orders only, so a floor</div></div>'+
+      '<div class="tile"><div class="k">Campaign</div><div class="v" style="font-size:20px">'+esc(c.status||"–")+'</div><div class="n">Meta delivery status</div></div>'+
+    '</div>';
+
+    h+="<h2>Each ad</h2>";
+    if(s.ads&&s.ads.length){
+      h+='<div class="wrap"><table><tr><th>Ad</th><th>Spend</th><th>Views</th><th>Clicks</th><th>CTR</th><th>Cost per click</th><th>Add to cart</th><th>Sales</th><th>Break-even per sale</th><th>Verdict</th></tr>';
+      s.ads.forEach(function(a){
+        h+='<tr><td><b>'+esc(nice(a.ad))+'</b><br><span class="sub">'+esc(a.product)+'</span></td><td>'+money(a.spend)+'</td><td>'+(a.impressions||0).toLocaleString()+'</td><td>'+Math.round(a.clicks||0)+'</td><td>'+((a.ctr||0)*100).toFixed(2)+'%</td><td>'+money(a.cpc)+'</td><td>'+Math.round(a.atc||0)+'</td><td>'+Math.max(a.meta_purchases||0,a.shopify_tagged_orders||0)+'</td><td>'+money(a.breakeven)+'</td><td class="verdict">'+esc(a.verdict)+'</td></tr>'});
+      h+='</table></div><div class="note">Meta splits the budget unevenly, so this is a comparison, not a controlled experiment. Clicks become readable after a few days. Sales usually don\'t at this budget. Meta can add a sale up to 7 days after a click.</div>';
+    } else h+='<div class="sub">No ad data yet.</div>';
+
+    h+="<h2>Other goals</h2>";
+    var g=s.other_goals||{};
+    Object.keys(g).forEach(function(k){h+='<div class="sub" style="margin-bottom:4px"><b style="color:var(--ink)">'+esc(g[k].label)+':</b> '+esc(String(g[k].status).replace(/_/g," "))+'</div>'});
+    $("aa-body").innerHTML=h;
+  }
+
+  function load(){
+    if(!GIST_ID){ $("aa-updated").textContent=""; $("aa-body").innerHTML='<div class="alert"><b>No access key.</b> Open this page from your saved Ads agent bookmark.</div>'; return; }
+    $("aa-refresh").textContent="Refreshing…";
+    fetch("https://api.github.com/gists/"+GIST_ID,{cache:"no-store"})
+      .then(function(r){if(!r.ok)throw new Error("status "+r.status);return r.json()})
+      .then(function(g){render(JSON.parse(g.files[FILE].content))})
+      .catch(function(){
+        return fetch("https://gist.githubusercontent.com/"+REPO.split("/")[0]+"/"+GIST_ID+"/raw/"+FILE+"?t="+Date.now())
+          .then(function(r){if(!r.ok)throw new Error();return r.json()}).then(render)
+          .catch(function(){$("aa-body").innerHTML='<div class="alert"><b>Can\'t load the Ads agent data.</b> Check your connection, then click Refresh.</div>'});
+      })
+      .then(function(){$("aa-refresh").textContent="Refresh"});
+  }
+  $("aa-refresh").addEventListener("click",load);
+  load();
+  setInterval(load,5*60*1000);
+})();
+</script>
+</body></html>
