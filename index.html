@@ -81,7 +81,7 @@
     else h+='<div class="ok"><b>No problems.</b> Ads, shop, tracking and spend all look normal.</div>';
     if(mins>150) h+='<div class="stale"><b>This page is out of date.</b> The agent hasn\'t checked in over 2 hours. Click Check now.</div>';
     var src=s.sources||{};
-    h+='<div class="note">'+["meta","shopify","site"].map(function(k){var ok=src[k]==="ok";return '<span class="dot" style="background:'+(ok?"var(--good)":"var(--red)")+'"></span>'+({meta:"Meta",shopify:"Shopify",site:"Shop site"})[k]+(ok?"":" ("+esc(src[k])+")")}).join(" &nbsp; ")+'</div>';
+    h+='<div class="note">'+["meta","google","shopify","site"].filter(function(k){return k!=="google"||src.google}).map(function(k){var ok=src[k]==="ok";return '<span class="dot" style="background:'+(ok?"var(--good)":"var(--red)")+'"></span>'+({meta:"Meta",google:"Google",shopify:"Shopify",site:"Shop site"})[k]+(ok?"":" ("+esc(src[k])+")")}).join(" &nbsp; ")+'</div>';
 
     h+="<h2>Decisions waiting for you</h2>";
     if(s.proposals&&s.proposals.length){s.proposals.forEach(function(p){
@@ -105,6 +105,26 @@
         h+='<tr><td><b>'+esc(nice(a.ad))+'</b><br><span class="sub">'+esc(a.product)+'</span></td><td>'+money(a.spend)+'</td><td>'+(a.impressions||0).toLocaleString()+'</td><td>'+Math.round(a.clicks||0)+'</td><td>'+((a.ctr||0)*100).toFixed(2)+'%</td><td>'+money(a.cpc)+'</td><td>'+Math.round(a.atc||0)+'</td><td>'+Math.max(a.meta_purchases||0,a.shopify_tagged_orders||0)+'</td><td>'+money(a.breakeven)+'</td><td class="verdict">'+esc(a.verdict)+'</td></tr>'});
       h+='</table></div><div class="note">Meta splits the budget unevenly, so this is a comparison, not a controlled experiment. Clicks become readable after a few days. Sales usually don\'t at this budget. Meta can add a sale up to 7 days after a click.</div>';
     } else h+='<div class="sub">No ad data yet.</div>';
+
+    var G=s.google;
+    if(G){
+      var gc=(G.campaigns||[])[0]||{};
+      h+="<h2>Christmas Shopping · Google · "+esc(gc.start||"")+" to "+esc(gc.end||"")+"</h2>";
+      h+='<div class="tiles">'+
+        '<div class="tile"><div class="k">Spent</div><div class="v">'+money(G.spend_total)+'</div><div class="n">'+money(gc.daily_budget)+' a day budget · '+money(gc.cost_today)+' today</div></div>'+
+        '<div class="tile"><div class="k">Clicks</div><div class="v">'+(G.clicks_total||0)+'</div><div class="n">'+(G.impressions_total||0).toLocaleString()+' views · '+(G.clicks_total?money(G.spend_total/G.clicks_total):"–")+' a click</div></div>'+
+        '<div class="tile"><div class="k">Sales from Google</div><div class="v">'+(G.tagged_orders||0)+'</div><div class="n">'+money(G.tagged_revenue)+' tagged orders · Google counts '+(G.google_conversions||0)+'</div></div>'+
+        '<div class="tile"><div class="k">Campaign</div><div class="v" style="font-size:20px">'+esc(String(gc.primary_status||gc.status||"–").replace(/_/g," "))+'</div><div class="n">Google status</div></div>'+
+      '</div>';
+      if(G.top_products&&G.top_products.length){
+        h+='<div class="wrap"><table><tr><th>Product</th><th>Views</th><th>Clicks</th><th>Spend</th><th>Sales (Google)</th></tr>';
+        G.top_products.forEach(function(p){h+='<tr><td>'+esc(p.title)+'</td><td>'+(p.impressions||0).toLocaleString()+'</td><td>'+(p.clicks||0)+'</td><td>'+money(p.cost)+'</td><td>'+(p.conversions||0)+'</td></tr>'});
+        h+='</table></div>';
+      } else h+='<div class="sub">No product views yet. Ads start once Google finishes checking the products.</div>';
+      if(G.top_terms&&G.top_terms.length){
+        h+='<div class="note"><b>Top searches:</b> '+G.top_terms.map(function(t){return esc(t.term)+" ("+t.clicks+")"}).join(", ")+'</div>';
+      }
+    }
 
     h+="<h2>Other goals</h2>";
     var g=s.other_goals||{};
