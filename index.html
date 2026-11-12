@@ -108,6 +108,22 @@
       s.ads.forEach(function(a){
         h+='<tr><td><b>'+esc(nice(a.ad))+'</b><br><span class="sub">'+esc(a.product)+'</span></td><td>'+money(a.spend)+'</td><td>'+(a.impressions||0).toLocaleString()+'</td><td>'+Math.round(a.clicks||0)+'</td><td>'+((a.ctr||0)*100).toFixed(2)+'%</td><td>'+money(a.cpc)+'</td><td>'+Math.round(a.atc||0)+'</td><td>'+Math.max(a.meta_purchases||0,a.shopify_tagged_orders||0)+'</td><td>'+money(a.breakeven)+'</td><td class="verdict">'+esc(a.verdict)+'</td></tr>'});
       h+='</table></div><div class="note">Meta splits the budget unevenly, so this is a comparison, not a controlled experiment. Clicks become readable after a few days. Sales usually don\'t at this budget. Meta can add a sale up to 7 days after a click.</div>';
+      var hasP=s.ads.some(function(a){return a.platforms&&Object.keys(a.platforms).length});
+      if(hasP){
+        var PN={facebook:"Facebook",instagram:"Instagram",audience_network:"Audience Network",messenger:"Messenger",threads:"Threads"};
+        var tot={};
+        h+="<h2>Facebook vs Instagram</h2>";
+        h+='<div class="wrap"><table><tr><th>Ad</th><th>Where</th><th>Spend</th><th>Views</th><th>Clicks</th><th>Cost per click</th><th>Add to cart</th><th>Sales</th></tr>';
+        s.ads.forEach(function(a){
+          var ks=Object.keys(a.platforms||{}).sort(function(x,y){return (a.platforms[y].spend||0)-(a.platforms[x].spend||0)});
+          ks.forEach(function(k,i){var q=a.platforms[k];
+            var t=tot[k]||(tot[k]={spend:0,impressions:0,clicks:0,atc:0,purchases:0});["spend","impressions","clicks","atc","purchases"].forEach(function(f){t[f]+=q[f]||0});
+            h+='<tr><td>'+(i===0?'<b>'+esc(nice(a.ad))+'</b>':'')+'</td><td>'+esc(PN[k]||k)+'</td><td>'+money(q.spend)+'</td><td>'+(q.impressions||0).toLocaleString()+'</td><td>'+Math.round(q.clicks||0)+'</td><td>'+(q.clicks?money(q.spend/q.clicks):"–")+'</td><td>'+Math.round(q.atc||0)+'</td><td>'+Math.round(q.purchases||0)+'</td></tr>'});
+        });
+        Object.keys(tot).sort(function(x,y){return tot[y].spend-tot[x].spend}).forEach(function(k){var q=tot[k];
+          h+='<tr style="background:var(--card)"><td><b>All ads</b></td><td><b>'+esc(PN[k]||k)+'</b></td><td><b>'+money(q.spend)+'</b></td><td><b>'+q.impressions.toLocaleString()+'</b></td><td><b>'+Math.round(q.clicks)+'</b></td><td><b>'+(q.clicks?money(q.spend/q.clicks):"–")+'</b></td><td><b>'+Math.round(q.atc)+'</b></td><td><b>'+Math.round(q.purchases)+'</b></td></tr>'});
+        h+='</table></div><div class="note">Each ad runs in both apps. Meta decides how much each app gets, so this shows where the money is working.</div>';
+      }
     } else h+='<div class="sub">No ad data yet.</div>';
 
     var G=s.google;
