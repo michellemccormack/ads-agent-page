@@ -90,7 +90,7 @@
     else h+='<div class="sub">Nothing to approve.</div>';
 
     var pct=c.budget?Math.min(100,100*c.spend_total/c.budget):0;
-    h+="<h2>Christmas test · Meta · "+esc(c.start)+" to "+esc(c.end)+"</h2>";
+    h+="<h2>Christmas test · Facebook and Instagram · "+esc(c.start)+" to "+esc(c.end)+"</h2>";
     h+='<div class="tiles">'+
       '<div class="tile"><div class="k">Spent</div><div class="v">'+money(c.spend_total)+'</div><div class="n">of '+money(c.budget)+' approved · '+money(c.spend_today)+' today</div><div class="meter"><i style="width:'+pct.toFixed(1)+'%"></i></div></div>'+
       '<div class="tile"><div class="k">Shop orders</div><div class="v">'+(shop.orders_since_start||0)+'</div><div class="n">since launch · '+(shop.ad_tagged_orders||0)+' tagged to these ads</div></div>'+
@@ -99,7 +99,7 @@
       '<div class="tile"><div class="k">Campaign</div><div class="v" style="font-size:20px">'+esc(c.status||"–")+'</div><div class="n">Meta delivery status</div></div>'+
     '</div>';
 
-    h+="<h2>Each ad</h2>";
+    h+="<h2>Each ad · Facebook and Instagram</h2>";
     if(s.ads&&s.ads.length){
       h+='<div class="wrap"><table><tr><th>Ad</th><th>Spend</th><th>Views</th><th>Clicks</th><th>CTR</th><th>Cost per click</th><th>Add to cart</th><th>Sales</th><th>Break-even per sale</th><th>Verdict</th></tr>';
       s.ads.forEach(function(a){
