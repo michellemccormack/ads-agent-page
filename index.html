@@ -9,6 +9,8 @@
 #aa *{box-sizing:border-box}
 #aa h1{font-family:"Libre Caslon Text",Georgia,serif;font-size:34px;margin:0 0 4px;font-weight:700}
 #aa h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:28px 0 10px;color:var(--muted);font-weight:800}
+#aa .plat{font-size:39px;line-height:1.1;font-weight:800;color:var(--ink);margin:40px 0 4px}
+#aa h2.after{margin-top:0}
 #aa .sub{color:var(--muted);font-size:14px}
 #aa .bar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
 #aa a.btn,#aa button.btn{display:inline-block;font:600 14px Archivo,sans-serif;padding:10px 14px;border:1.5px solid var(--ink);
@@ -90,7 +92,8 @@
     else h+='<div class="sub">Nothing to approve.</div>';
 
     var pct=c.budget?Math.min(100,100*c.spend_total/c.budget):0;
-    h+="<h2>Christmas test · Facebook and Instagram · "+esc(c.start)+" to "+esc(c.end)+"</h2>";
+    h+='<div class="plat">Facebook and Instagram</div>';
+    h+="<h2 class=\"after\">Christmas test · "+esc(c.start)+" to "+esc(c.end)+"</h2>";
     h+='<div class="tiles">'+
       '<div class="tile"><div class="k">Spent</div><div class="v">'+money(c.spend_total)+'</div><div class="n">of '+money(c.budget)+' approved · '+money(c.spend_today)+' today</div><div class="meter"><i style="width:'+pct.toFixed(1)+'%"></i></div></div>'+
       '<div class="tile"><div class="k">Shop orders</div><div class="v">'+(shop.orders_since_start||0)+'</div><div class="n">since launch · '+(shop.ad_tagged_orders||0)+' tagged to these ads</div></div>'+
@@ -99,7 +102,7 @@
       '<div class="tile"><div class="k">Campaign</div><div class="v" style="font-size:20px">'+esc(c.status||"–")+'</div><div class="n">Meta delivery status</div></div>'+
     '</div>';
 
-    h+="<h2>Each ad · Facebook and Instagram</h2>";
+    h+="<h2>Facebook and Instagram</h2>";
     if(s.ads&&s.ads.length){
       h+='<div class="wrap"><table><tr><th>Ad</th><th>Spend</th><th>Views</th><th>Clicks</th><th>CTR</th><th>Cost per click</th><th>Add to cart</th><th>Sales</th><th>Break-even per sale</th><th>Verdict</th></tr>';
       s.ads.forEach(function(a){
@@ -110,7 +113,8 @@
     var G=s.google;
     if(G){
       var gc=(G.campaigns||[])[0]||{};
-      h+="<h2>Christmas Shopping · Google · "+esc(gc.start||"")+" to "+esc(gc.end||"")+"</h2>";
+      h+='<div class="plat">Google</div>';
+      h+="<h2 class=\"after\">Christmas Shopping · "+esc(gc.start||"")+" to "+esc(gc.end||"")+"</h2>";
       h+='<div class="tiles">'+
         '<div class="tile"><div class="k">Spent</div><div class="v">'+money(G.spend_total)+'</div><div class="n">'+money(gc.daily_budget)+' a day budget · '+money(gc.cost_today)+' today</div></div>'+
         '<div class="tile"><div class="k">Clicks</div><div class="v">'+(G.clicks_total||0)+'</div><div class="n">'+(G.impressions_total||0).toLocaleString()+' views · '+(G.clicks_total?money(G.spend_total/G.clicks_total):"–")+' a click</div></div>'+
